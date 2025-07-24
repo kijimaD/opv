@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org-Mode Pomodoro Viewer</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1 class="task-title" id="task-title">Loading...</h1>
+            <div class="time-display" id="time-display">--:--</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="today-points">
+                <div class="points-text" id="points-text">Today: 0 pomodoros</div>
+                <div class="tomatoes" id="tomatoes"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="completion-overlay" id="completion-overlay">
+        <div class="completion-message">Task Completed!</div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
