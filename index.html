@@ -95,7 +95,13 @@
     </div>
 
     <script>
-        let pollInterval = null;
+        let syncInterval = null;
+        let countdownInterval = null;
+        let remainingTime = 0;
+        let totalTime = 0;
+        let taskTitle = '';
+        let todayPoints = 0;
+        let isActive = false;
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
@@ -103,66 +109,79 @@
             return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function updateUI(data) {
+        function updateDisplay() {
             const container = document.querySelector('.container');
-            const taskTitle = document.getElementById('taskTitle');
-            const timeDisplay = document.getElementById('timeDisplay');
-            const progressBar = document.getElementById('progressBar');
-            const todayPoints = document.getElementById('todayPoints');
+            const titleEl = document.getElementById('taskTitle');
+            const timeEl = document.getElementById('timeDisplay');
+            const progressEl = document.getElementById('progressBar');
+            const pointsEl = document.getElementById('todayPoints');
 
-            if (data.isActive) {
+            if (isActive && remainingTime > 0) {
                 container.classList.remove('inactive');
-                taskTitle.textContent = data.taskTitle || 'No task';
-                timeDisplay.textContent = formatTime(data.remainingTime);
+                titleEl.textContent = taskTitle || 'No task';
+                timeEl.textContent = formatTime(remainingTime);
 
-                const progress = ((data.totalTime - data.remainingTime) / data.totalTime) * 100;
-                progressBar.style.width = progress + '%';
+                const progress = ((totalTime - remainingTime) / totalTime) * 100;
+                progressEl.style.width = Math.min(100, progress) + '%';
+
+                remainingTime--; // Countdown
             } else {
                 container.classList.add('inactive');
-                taskTitle.textContent = 'Pomodoro not active';
-                timeDisplay.textContent = '--:--';
-                progressBar.style.width = '0%';
+                titleEl.textContent = 'Pomodoro not active';
+                timeEl.textContent = '--:--';
+                progressEl.style.width = '0%';
+
+                if (remainingTime <= 0 && isActive) {
+                    fetchPomodoroData(); // Check if timer ended
+                }
             }
 
-            todayPoints.textContent = `Today: ${data.todayPoints} pomodoros`;
+            pointsEl.textContent = `Today: ${todayPoints} pomodoros`;
         }
 
         async function fetchPomodoroData() {
             try {
                 const response = await fetch('/api/pomodoro');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network response was not ok');
+
                 const data = await response.json();
-                updateUI(data);
+
+                // Update global state
+                remainingTime = data.remainingTime || 0;
+                totalTime = data.totalTime || 0;
+                taskTitle = data.taskTitle || '';
+                todayPoints = data.todayPoints || 0;
+                isActive = data.isActive || false;
+
+                updateDisplay();
+
+                // Start/stop countdown based on active state
+                if (isActive && !countdownInterval) {
+                    countdownInterval = setInterval(updateDisplay, 1000);
+                } else if (!isActive && countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
             } catch (error) {
                 console.error('Error fetching pomodoro data:', error);
                 document.getElementById('taskTitle').textContent = 'Error loading data';
-                document.getElementById('taskTitle').classList.add('error');
             }
         }
 
-        function startPolling() {
+        // Initialize
+        window.addEventListener('load', () => {
             fetchPomodoroData();
-            pollInterval = setInterval(fetchPomodoroData, 5000); // Poll every 5 seconds
-        }
+            syncInterval = setInterval(fetchPomodoroData, 30000);
+        });
 
-        function stopPolling() {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
-        }
-
-        // Start polling when page loads
-        window.addEventListener('load', startPolling);
-
-        // Stop polling when page is hidden
+        // Handle page visibility
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                stopPolling();
+                if (syncInterval) clearInterval(syncInterval);
+                if (countdownInterval) clearInterval(countdownInterval);
             } else {
-                startPolling();
+                fetchPomodoroData();
+                syncInterval = setInterval(fetchPomodoroData, 30000);
             }
         });
     </script>

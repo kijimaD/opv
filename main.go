@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //go:embed index.html
@@ -20,6 +21,7 @@ type PomodoroData struct {
 	TotalTime      int    `json:"totalTime"`
 	IsActive       bool   `json:"isActive"`
 	TodayPoints    int    `json:"todayPoints"`
+	ServerTime     int64  `json:"serverTime"`     // Server timestamp for sync
 }
 
 func main() {
@@ -62,7 +64,9 @@ func pomodoroAPI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	data := PomodoroData{}
+	data := PomodoroData{
+		ServerTime: time.Now().Unix(),
+	}
 
 	// Get remaining time in seconds
 	remainingStr, err := getEmacsValue("(org-pomodoro-remaining-seconds)")
