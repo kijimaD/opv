@@ -1,0 +1,15 @@
+services:
+  opv:
+    build:
+      context: .
+      target: app
+    container_name: opv
+    ports:
+      - "8007:8007"
+    volumes:
+      # ホストマシンによって変わるだろう
+      # (print server-socket-dir) で確認する
+      - /run/user/1000/emacs:/run/user/1000/emacs:ro
+    environment:
+      - EMACS_SOCKET_NAME=/run/user/1000/emacs/server
+    restart: always

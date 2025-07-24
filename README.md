@@ -10,6 +10,12 @@ Emacsとの連携は https://kijimad.github.io/.emacs.d/#org19f0828 を参考に
 
 ![images](./docs/inactive.png)
 
+## 実行
+
+```
+docker compose up -d
+```
+
 ## メモ
 
 - kindle paper white でも動くように素のJavaScriptである
