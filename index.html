@@ -104,6 +104,14 @@
             width: 32px;
             height: 32px;
         }
+        
+        .separator {
+            display: inline-block;
+            width: 2px;
+            height: 32px;
+            background-color: #666;
+            margin: 0 4px;
+        }
 
         .inactive {
             opacity: 0.5;
@@ -214,8 +222,15 @@
             // Clear existing tomatoes
             tomatoContainer.innerHTML = '';
             
-            // Add tomato SVGs
+            // Add tomato SVGs with separators every 4 items
             for (let i = 0; i < points; i++) {
+                // Add separator before every group of 4 (except the first group)
+                if (i > 0 && i % 4 === 0) {
+                    const separator = document.createElement('div');
+                    separator.className = 'separator';
+                    tomatoContainer.appendChild(separator);
+                }
+                
                 const tomato = document.createElement('img');
                 tomato.className = 'tomato';
                 tomato.src = '/file/tomato.svg';
