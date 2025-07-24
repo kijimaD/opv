@@ -1,0 +1,16 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <radialGradient id="tomatoGradient" cx="0.3" cy="0.3" r="0.8">
+            <stop offset="0%" style="stop-color:#ff6b47;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#d73502;stop-opacity:1" />
+        </radialGradient>
+    </defs>
+    <!-- Tomato body -->
+    <ellipse cx="16" cy="18" rx="12" ry="10" fill="url(#tomatoGradient)" />
+    <!-- Top ridges -->
+    <path d="M 8 12 Q 12 8 16 12 Q 20 8 24 12 L 22 16 Q 18 14 16 16 Q 14 14 10 16 Z" fill="#228B22" />
+    <!-- Stem -->
+    <rect x="15" y="6" width="2" height="6" fill="#8B4513" />
+    <!-- Highlight -->
+    <ellipse cx="12" cy="14" rx="3" ry="4" fill="#ff8a6b" opacity="0.6" />
+</svg>

@@ -10,9 +10,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"path/filepath"
+	"mime"
 )
 
-//go:embed index.html
+//go:embed index.html file/*
 var content embed.FS
 
 type PomodoroData struct {
@@ -26,6 +28,7 @@ type PomodoroData struct {
 
 func main() {
 	http.HandleFunc("/", serveHTML)
+	http.HandleFunc("/file/", serveFile)
 	http.HandleFunc("/api/pomodoro", pomodoroAPI)
 	http.HandleFunc("/api/debug", debugAPI)
 
@@ -40,6 +43,38 @@ func serveHTML(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(data)
+}
+
+func serveFile(w http.ResponseWriter, r *http.Request) {
+	// Remove "/file/" prefix to get the actual filename
+	filename := strings.TrimPrefix(r.URL.Path, "/file/")
+	
+	// Prevent directory traversal attacks
+	if strings.Contains(filename, "..") {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+	
+	// Construct full path within embedded filesystem
+	fullPath := "file/" + filename
+	
+	// Read file from embedded filesystem
+	data, err := content.ReadFile(fullPath)
+	if err != nil {
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
+	}
+	
+	// Set appropriate content type based on file extension
+	ext := filepath.Ext(filename)
+	contentType := mime.TypeByExtension(ext)
+	if contentType == "" {
+		// Default content type for unknown extensions
+		contentType = "application/octet-stream"
+	}
+	
+	w.Header().Set("Content-Type", contentType)
 	w.Write(data)
 }
 

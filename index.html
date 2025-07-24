@@ -71,6 +71,30 @@
             font-size: 1.2em;
             color: #666;
             margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .points-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .tomatoes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 400px;
+        }
+        
+        .tomato {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
         }
 
         .inactive {
@@ -134,7 +158,10 @@
         <div class="progress-container">
             <div class="progress-bar" id="progressBar"></div>
         </div>
-        <div class="today-points" id="todayPoints">Today: 0 pomodoros</div>
+        <div class="today-points" id="todayPoints">
+            <div class="points-number">Today: 0 pomodoros</div>
+            <div class="tomatoes" id="tomatoes"></div>
+        </div>
     </div>
 
     <div class="completion" id="completionOverlay">
@@ -166,6 +193,27 @@
             setTimeout(() => {
                 overlay.classList.remove('show');
             }, 3000);
+        }
+
+
+        function updateTomatoDisplay(points) {
+            const tomatoContainer = document.getElementById('tomatoes');
+            const pointsText = document.querySelector('.points-number');
+            
+            // Update points text
+            pointsText.textContent = `Today: ${points} pomodoros`;
+            
+            // Clear existing tomatoes
+            tomatoContainer.innerHTML = '';
+            
+            // Add tomato SVGs
+            for (let i = 0; i < points; i++) {
+                const tomato = document.createElement('img');
+                tomato.className = 'tomato';
+                tomato.src = '/file/tomato.svg';
+                tomato.alt = 'Pomodoro';
+                tomatoContainer.appendChild(tomato);
+            }
         }
 
         function updateDisplay() {
@@ -200,7 +248,7 @@
                 }
             }
 
-            pointsEl.textContent = `Today: ${todayPoints} pomodoros`;
+            updateTomatoDisplay(todayPoints);
         }
 
         async function fetchPomodoroData() {
