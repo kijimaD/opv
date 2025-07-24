@@ -66,8 +66,8 @@ function calculateRemainingTime() {
 function updateDisplay(timestamp) {
     if (!lastUpdateTime) lastUpdateTime = timestamp;
 
-    // Only update every second
-    if (timestamp - lastUpdateTime >= 1000) {
+    // Update immediately on first call or every second
+    if (timestamp === 0 || timestamp - lastUpdateTime >= 1000) {
         lastUpdateTime = timestamp;
 
         const container = document.querySelector('.container');
@@ -81,7 +81,7 @@ function updateDisplay(timestamp) {
             remainingTime = calculateRemainingTime();
         }
 
-        // Update background color based on active state
+        // Update display based on active state
         if (isActive && remainingTime > 0) {
             document.body.classList.add('active');
             container.classList.remove('inactive');
@@ -98,12 +98,9 @@ function updateDisplay(timestamp) {
             progressEl.style.width = '0%';
 
             // Check if we just completed a pomodoro
-            if (remainingTime <= 0 && wasActive && isActive) {
+            if (remainingTime <= 0 && wasActive && !isActive) {
                 showCompletionAnimation();
                 wasActive = false; // Prevent multiple animations
-                fetchPomodoroData(); // Check if timer ended
-            } else if (remainingTime <= 0 && isActive) {
-                fetchPomodoroData(); // Check if timer ended
             }
         }
 
@@ -137,6 +134,7 @@ async function fetchPomodoroData() {
         // Reset timing for animation frame
         lastUpdateTime = 0;
 
+        // Always update display immediately
         updateDisplay(0);
 
         // Start/stop animation based on active state
