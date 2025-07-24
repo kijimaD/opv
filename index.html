@@ -81,6 +81,49 @@
             text-align: center;
             padding: 20px;
         }
+
+        .completion {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .completion.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .completion-text {
+            color: white;
+            font-size: 3em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out infinite alternate;
+        }
+
+        .completion-subtitle {
+            color: white;
+            font-size: 1.5em;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-20px); }
+        }
     </style>
 </head>
 <body>
@@ -94,6 +137,11 @@
         <div class="today-points" id="todayPoints">Today: 0 pomodoros</div>
     </div>
 
+    <div class="completion" id="completionOverlay">
+        <div class="completion-text">🍅 Complete!</div>
+        <div class="completion-subtitle">Great job on finishing your pomodoro!</div>
+    </div>
+
     <script>
         let syncInterval = null;
         let countdownInterval = null;
@@ -102,11 +150,22 @@
         let taskTitle = '';
         let todayPoints = 0;
         let isActive = false;
+        let wasActive = false; // Track previous state
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function showCompletionAnimation() {
+            const overlay = document.getElementById('completionOverlay');
+            overlay.classList.add('show');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                overlay.classList.remove('show');
+            }, 3000);
         }
 
         function updateDisplay() {
@@ -131,7 +190,12 @@
                 timeEl.textContent = '--:--';
                 progressEl.style.width = '0%';
 
-                if (remainingTime <= 0 && isActive) {
+                // Check if we just completed a pomodoro
+                if (remainingTime <= 0 && wasActive && isActive) {
+                    showCompletionAnimation();
+                    wasActive = false; // Prevent multiple animations
+                    fetchPomodoroData(); // Check if timer ended
+                } else if (remainingTime <= 0 && isActive) {
                     fetchPomodoroData(); // Check if timer ended
                 }
             }
@@ -147,6 +211,7 @@
                 const data = await response.json();
 
                 // Update global state
+                wasActive = isActive; // Store previous state
                 remainingTime = data.remainingTime || 0;
                 totalTime = data.totalTime || 0;
                 taskTitle = data.taskTitle || '';
