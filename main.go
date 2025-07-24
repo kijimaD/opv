@@ -99,7 +99,7 @@ func pomodoroAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get today's points
-	pointsStr, err := getEmacsValue("(kd/pmd-today-point-display)")
+	pointsStr, err := getEmacsValue("kd/pmd-today-point")
 	if err == nil && pointsStr != "nil" {
 		// Try parsing as float first
 		if points, err := strconv.ParseFloat(pointsStr, 64); err == nil {
@@ -121,7 +121,7 @@ func debugAPI(w http.ResponseWriter, r *http.Request) {
 	lengthRaw, _ := getEmacsValue("org-pomodoro-length")
 	activeRaw, _ := getEmacsValue("(org-pomodoro-active-p)")
 	headingRaw, _ := getEmacsValue("org-clock-heading")
-	pointsRaw, _ := getEmacsValue("(kd/pmd-today-point-display)")
+	pointsRaw, _ := getEmacsValue("kd/pmd-today-point")
 	pomoTimeRaw, _ := getEmacsValue("(kd/org-pomodoro-time)")
 
 	debug["raw"] = map[string]string{

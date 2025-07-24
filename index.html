@@ -171,7 +171,7 @@
         // Initialize
         window.addEventListener('load', () => {
             fetchPomodoroData();
-            syncInterval = setInterval(fetchPomodoroData, 30000);
+            syncInterval = setInterval(fetchPomodoroData, 10000);
         });
 
         // Handle page visibility
@@ -181,7 +181,7 @@
                 if (countdownInterval) clearInterval(countdownInterval);
             } else {
                 fetchPomodoroData();
-                syncInterval = setInterval(fetchPomodoroData, 30000);
+                syncInterval = setInterval(fetchPomodoroData, 10000);
             }
         });
     </script>
