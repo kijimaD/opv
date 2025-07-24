@@ -16,6 +16,10 @@
             height: 100vh;
             overflow: hidden;
         }
+        
+        body.active {
+            background-color: #000000;
+        }
 
         .container {
             background: white;
@@ -227,7 +231,9 @@
             const progressEl = document.getElementById('progressBar');
             const pointsEl = document.getElementById('todayPoints');
 
+            // Update background color based on active state
             if (isActive && remainingTime > 0) {
+                document.body.classList.add('active');
                 container.classList.remove('inactive');
                 titleEl.textContent = taskTitle || 'No task';
                 timeEl.textContent = formatTime(remainingTime);
@@ -237,6 +243,7 @@
 
                 remainingTime--; // Countdown
             } else {
+                document.body.classList.remove('active');
                 container.classList.add('inactive');
                 titleEl.textContent = 'Pomodoro not active';
                 timeEl.textContent = '--:--';
