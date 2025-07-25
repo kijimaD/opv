@@ -31,7 +31,7 @@ function updateTomatoDisplay(points) {
     const pointsText = document.querySelector('.points-number');
 
     // Update points text
-    pointsText.textContent = `Today: ${points} pomodoros`;
+    pointsText.textContent = `Today: ${points} pmds`;
 
     // Clear existing tomatoes
     tomatoContainer.innerHTML = '';
