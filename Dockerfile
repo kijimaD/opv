@@ -1,5 +1,4 @@
-# Multi-stage build for Go application
-FROM golang:1.21-alpine AS builder
+FROM golang:1.24.5-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git

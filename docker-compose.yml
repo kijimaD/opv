@@ -3,7 +3,7 @@ services:
     build:
       context: .
       target: app
-    container_name: opv
+    container_name: opv-server
     ports:
       - "8007:8007"
     volumes:
@@ -13,3 +13,5 @@ services:
     environment:
       - EMACS_SOCKET_NAME=/run/user/1000/emacs/server
     restart: always
+    labels:
+      description: "org-pomodoroビューワー"
