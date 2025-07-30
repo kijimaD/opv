@@ -7,22 +7,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/file/styles.css">
 </head>
-<body>
+<body class="bg-light d-flex align-items-center min-vh-100">
     <div class="container">
-        <h1 class="task-title" id="taskTitle">Loading...</h1>
-        <div class="time-display" id="timeDisplay">--:--</div>
-        <div class="progress" style="height: 50px; margin: 30px 0;">
-            <div class="progress-bar progress-bar-striped bg-danger" id="progressBar" role="progressbar"></div>
-        </div>
-        <div class="today-points" id="todayPoints">
-            <small class="points-number">Today: 0 pmds</small>
-            <div class="tomatoes" id="tomatoes"></div>
+        <div class="card shadow mx-auto" style="max-width: 480px;">
+            <div class="card-body p-4">
+                <h1 class="text-center fw-bold mb-3" style="font-size: 6rem;" id="taskTitle">Loading...</h1>
+                <div class="text-center text-danger fw-bold fs-3" style="font-variant-numeric: tabular-nums;" id="timeDisplay">--:--</div>
+                <div class="progress my-4" style="height: 50px;">
+                    <div class="progress-bar progress-bar-striped bg-danger" id="progressBar" role="progressbar"></div>
+                </div>
+                <div class="text-center mt-3" id="todayPoints">
+                    <small class="text-muted d-block mb-2 points-number">Today: 0 pmds</small>
+                    <div class="d-flex flex-wrap justify-content-center gap-2" id="tomatoes"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="completion" id="completionOverlay">
-        <div class="completion-text">🍅 Complete!</div>
-        <div class="completion-subtitle">Great job on finishing your pomodoro!</div>
+    <div class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-success bg-gradient opacity-0 invisible" id="completionOverlay" style="transition: opacity 0.5s ease, visibility 0.5s ease; z-index: 1000;">
+        <div class="text-white fw-bold" style="font-size: 3rem; animation: bounce 1s ease-in-out infinite alternate;">🍅 Complete!</div>
+        <div class="text-white fs-4 opacity-75">Great job on finishing your pomodoro!</div>
     </div>
 
     <script src="/file/app.js"></script>

@@ -18,11 +18,13 @@ function formatTime(seconds) {
 
 function showCompletionAnimation() {
     const overlay = document.getElementById('completionOverlay');
-    overlay.classList.add('show');
+    overlay.classList.remove('opacity-0', 'invisible');
+    overlay.classList.add('opacity-100', 'visible');
 
     // Hide after 3 seconds
     setTimeout(() => {
-        overlay.classList.remove('show');
+        overlay.classList.remove('opacity-100', 'visible');
+        overlay.classList.add('opacity-0', 'invisible');
     }, 3000);
 }
 
@@ -41,12 +43,15 @@ function updateTomatoDisplay(points) {
         // Add separator before every group of 4 (except the first group)
         if (i > 0 && i % 4 === 0) {
             const separator = document.createElement('div');
-            separator.className = 'separator';
+            separator.className = 'vr mx-2';
+            separator.style.height = '32px';
             tomatoContainer.appendChild(separator);
         }
 
         const tomato = document.createElement('img');
-        tomato.className = 'tomato';
+        tomato.className = 'img-fluid';
+        tomato.style.width = '32px';
+        tomato.style.height = '32px';
         tomato.src = '/file/tomato.svg';
         tomato.alt = 'Pomodoro';
         tomatoContainer.appendChild(tomato);
@@ -84,7 +89,7 @@ function updateDisplay(timestamp) {
         // Update display based on active state
         if (isActive && remainingTime > 0) {
             document.body.classList.add('active');
-            container.classList.remove('inactive');
+            // Remove opacity change - card stays visible
             titleEl.textContent = taskTitle || 'No task';
             timeEl.textContent = formatTime(remainingTime);
 
@@ -92,8 +97,8 @@ function updateDisplay(timestamp) {
             progressEl.style.width = Math.min(100, progress) + '%';
         } else {
             document.body.classList.remove('active');
-            container.classList.add('inactive');
-            titleEl.textContent = 'Pomodoro not active';
+            // Remove opacity change - card stays visible
+            titleEl.textContent = 'Are you ready?';
             timeEl.textContent = '--:--';
             progressEl.style.width = '0%';
 
