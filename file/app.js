@@ -128,7 +128,7 @@ async function fetchPomodoroData() {
         // Update global state
         wasActive = isActive; // Store previous state
         currentData = data; // Store full data
-        lastSyncTime = data.serverTime || Math.floor(Date.now() / 1000); // Store server time
+        lastSyncTime = Math.floor(Date.now() / 1000); // Store server time
 
         remainingTime = data.remainingTime || 0;
         totalTime = data.totalTime || 0;
