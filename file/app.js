@@ -1,5 +1,5 @@
 let syncInterval = null;
-let animationFrameId = null;
+let updateInterval = null; // For 1-second updates
 let remainingTime = 0;
 let totalTime = 0;
 let taskTitle = '';
@@ -8,7 +8,6 @@ let isActive = false;
 let wasActive = false; // Track previous state
 let lastSyncTime = 0; // Server time at last sync
 let currentData = null; // Store full data from server
-let lastUpdateTime = 0; // For animation frame timing
 
 function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
@@ -28,7 +27,13 @@ function showCompletionAnimation() {
     }, 3000);
 }
 
+let lastDisplayedPoints = -1; // Track last displayed points
+
 function updateTomatoDisplay(points) {
+    // Skip if points haven't changed
+    if (points === lastDisplayedPoints) return;
+    lastDisplayedPoints = points;
+
     const tomatoContainer = document.getElementById('tomatoes');
     const pointsText = document.querySelector('.points-number');
 
@@ -68,54 +73,40 @@ function calculateRemainingTime() {
     return Math.max(0, remaining);
 }
 
-function updateDisplay(timestamp) {
-    if (!lastUpdateTime) lastUpdateTime = timestamp;
+function updateDisplay() {
+    const container = document.querySelector('.container');
+    const titleEl = document.getElementById('taskTitle');
+    const timeEl = document.getElementById('timeDisplay');
+    const progressEl = document.getElementById('progressBar');
+    const pointsEl = document.getElementById('todayPoints');
 
-    // Update immediately on first call or every second
-    if (timestamp === 0 || timestamp - lastUpdateTime >= 1000) {
-        lastUpdateTime = timestamp;
-
-        const container = document.querySelector('.container');
-        const titleEl = document.getElementById('taskTitle');
-        const timeEl = document.getElementById('timeDisplay');
-        const progressEl = document.getElementById('progressBar');
-        const pointsEl = document.getElementById('todayPoints');
-
-        // Calculate current remaining time based on server sync
-        if (isActive) {
-            remainingTime = calculateRemainingTime();
-        }
-
-        // Update display based on active state
-        if (isActive && remainingTime > 0) {
-            document.body.classList.add('active');
-            // Remove opacity change - card stays visible
-            titleEl.textContent = taskTitle || 'No task';
-            timeEl.textContent = formatTime(remainingTime);
-
-            const progress = ((totalTime - remainingTime) / totalTime) * 100;
-            progressEl.style.width = Math.min(100, progress) + '%';
-        } else {
-            document.body.classList.remove('active');
-            // Remove opacity change - card stays visible
-            titleEl.textContent = 'Are you ready?';
-            timeEl.textContent = '--:--';
-            progressEl.style.width = '0%';
-
-            // Check if we just completed a pomodoro
-            if (remainingTime <= 0 && wasActive && !isActive) {
-                showCompletionAnimation();
-                wasActive = false; // Prevent multiple animations
-            }
-        }
-
-        updateTomatoDisplay(todayPoints);
-    }
-
-    // Continue animation loop if active
+    // Calculate current remaining time based on server sync
     if (isActive) {
-        animationFrameId = requestAnimationFrame(updateDisplay);
+        remainingTime = calculateRemainingTime();
     }
+
+    // Update display based on active state
+    if (isActive && remainingTime > 0) {
+        document.body.classList.add('active');
+        titleEl.textContent = taskTitle || 'No task';
+        timeEl.textContent = formatTime(remainingTime);
+
+        const progress = ((totalTime - remainingTime) / totalTime) * 100;
+        progressEl.style.width = Math.min(100, progress) + '%';
+    } else {
+        document.body.classList.remove('active');
+        titleEl.textContent = 'Are you ready?';
+        timeEl.textContent = '--:--';
+        progressEl.style.width = '0%';
+
+        // Check if we just completed a pomodoro
+        if (remainingTime <= 0 && wasActive && !isActive) {
+            showCompletionAnimation();
+            wasActive = false; // Prevent multiple animations
+        }
+    }
+
+    updateTomatoDisplay(todayPoints);
 }
 
 async function fetchPomodoroData() {
@@ -136,18 +127,15 @@ async function fetchPomodoroData() {
         todayPoints = data.todayPoints || 0;
         isActive = data.isActive || false;
 
-        // Reset timing for animation frame
-        lastUpdateTime = 0;
-
         // Always update display immediately
-        updateDisplay(0);
+        updateDisplay();
 
-        // Start/stop animation based on active state
-        if (isActive && !animationFrameId) {
-            animationFrameId = requestAnimationFrame(updateDisplay);
-        } else if (!isActive && animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
+        // Start/stop 1-second update interval based on active state
+        if (isActive && !updateInterval) {
+            updateInterval = setInterval(updateDisplay, 1000);
+        } else if (!isActive && updateInterval) {
+            clearInterval(updateInterval);
+            updateInterval = null;
         }
     } catch (error) {
         console.error('Error fetching pomodoro data:', error);
@@ -164,15 +152,19 @@ window.addEventListener('load', () => {
 // Handle page visibility
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        if (syncInterval) clearInterval(syncInterval);
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
+        if (syncInterval) {
+            clearInterval(syncInterval);
+            syncInterval = null;
+        }
+        if (updateInterval) {
+            clearInterval(updateInterval);
+            updateInterval = null;
         }
     } else {
         // When tab becomes visible again
         fetchPomodoroData();
-        syncInterval = setInterval(fetchPomodoroData, 10000);
-        // Animation will restart via fetchPomodoroData if active
+        if (!syncInterval) {
+            syncInterval = setInterval(fetchPomodoroData, 10000);
+        }
     }
 });
